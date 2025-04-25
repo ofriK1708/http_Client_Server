@@ -1,0 +1,54 @@
+# Build results
+bin/
+obj/
+out/
+
+# Rider project settings
+.idea/
+*.sln.iml
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Rider logs
+.idea/.idea.Rider*
+
+# ASP.NET stuff
+project.lock.json
+project.fragment.lock.json
+
+# .NET Core
+project.assets.json
+*.dbmdl
+*.bak
+*.log
+
+# VS Code (if you ever use it too)
+.vscode/
+
+# Rider caches (optional - if you really want a clean repo)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/shelf/
+
+# NuGet packages
+*.nupkg
+packages/
+*.snupkg
+*.nuspec
+*.psmdcp
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
