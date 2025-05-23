@@ -6,7 +6,7 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-});;
+});
 var app = builder.Build();
 
 app.MapControllers();

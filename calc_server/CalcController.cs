@@ -101,7 +101,7 @@ public class CalcController : ControllerBase
             History.Add(new HistoryEntry
             {
                 flavor = "INDEPENDENT",
-                operation = op!,
+                operation = request.operation!,
                 arguments = args,
                 result = result
             });
@@ -172,11 +172,11 @@ public class CalcController : ControllerBase
         if (expectedArgCount > 1) args.Add(CalculatorStack.Pop());
         try
         {
-            var result = PerformOperation(op!, args);
+            var result = PerformOperation(op, args);
             History.Add(new HistoryEntry
             {
                 flavor = "STACK",
-                operation = op!,
+                operation = operation,
                 arguments = args,
                 result = result
             });
