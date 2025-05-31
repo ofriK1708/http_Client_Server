@@ -8,7 +8,6 @@ namespace calc_server;
 [Route("calculator")]
 public class CalcController : ControllerBase
 {
-    // TODO understand why time gets printed weirdly in the log
     private static readonly Stack<int> CalculatorStack = new();
     private static readonly List<HistoryEntry> History = new();
     private static readonly ILog StackLogger = LogManager.GetLogger("stack-logger");
@@ -137,8 +136,8 @@ public class CalcController : ControllerBase
     [HttpGet("stack/size")]
     public IActionResult StackSize()
     {
-        StackLogger.Info($"Stack size is: {CalculatorStack.Count}");
-        StackLogger.Debug($"Stack content (first == top): {string.Join(",",CalculatorStack)}");
+        StackLogger.Info($"Stack size is {CalculatorStack.Count}");
+        StackLogger.Debug($"Stack content (first == top): [{string.Join(", ",CalculatorStack)}]");
         return Ok(new CalcResponse {result = CalculatorStack.Count});
     }
 
@@ -263,17 +262,20 @@ public class CalcController : ControllerBase
             // No filter — return STACK first, then INDEPENDENT
             entries = History.FindAll(entry => entry.flavor == "STACK");
             entries.AddRange(History.FindAll(entry => entry.flavor == "INDEPENDENT"));
+            StackLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "STACK")} stack actions");
+            IndependentLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "INDEPENDENT")} independent actions");
         }
         else if (flavor == "STACK")
         {
             entries = History.FindAll(entry => entry.flavor == "STACK");
+            StackLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "STACK")} stack actions");
         }
         else
         {
             entries = History.FindAll(entry => entry.flavor == "INDEPENDENT");
+            IndependentLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "INDEPENDENT")} independent actions");
         }
-        StackLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "stack")} stack actions");
-        IndependentLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "independent")} independent actions");
+        
         return Ok(new { result = entries });
     }
 }
