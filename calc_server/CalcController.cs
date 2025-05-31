@@ -1,4 +1,5 @@
 using calc_server.models;
+using log4net;
 using Microsoft.AspNetCore.Mvc;
 
 namespace calc_server;
@@ -10,6 +11,8 @@ public class CalcController : ControllerBase
     
     private static readonly Stack<int> CalculatorStack = new();
     private static readonly List<HistoryEntry> History = new();
+    private static readonly ILog StackLogger = LogManager.GetLogger("stack-logger");
+    private static readonly ILog IndependentLogger = LogManager.GetLogger("independent-logger");
     
     private static bool IsOperationValid(string? op, out int expectedArgCount)
     {
@@ -122,6 +125,8 @@ public class CalcController : ControllerBase
     [HttpGet("stack/size")]
     public IActionResult StackSize()
     {
+        StackLogger.Info($"Stack size is: {CalculatorStack.Count}");
+        StackLogger.Debug($"Stack content (first == top): {string.Join(",",CalculatorStack)}");
         return Ok(new CalcResponse {result = CalculatorStack.Count});
     }
 
