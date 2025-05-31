@@ -8,7 +8,7 @@ namespace calc_server;
 [Route("calculator")]
 public class CalcController : ControllerBase
 {
-    
+    // TODO understand why time gets printed weirdly in the log
     private static readonly Stack<int> CalculatorStack = new();
     private static readonly List<HistoryEntry> History = new();
     private static readonly ILog StackLogger = LogManager.GetLogger("stack-logger");
@@ -81,6 +81,9 @@ public class CalcController : ControllerBase
         var args = request.arguments;
 
         if (!IsOperationValid(op, out var expectedArgCount))
+        {
+            string errorMessage = $"Error: unknown operation: {request.operation}";
+            IndependentLogger.Error($"Server encountered an error ! message: {errorMessage}");
             return Conflict
             (
                 new CalcResponse
@@ -88,15 +91,20 @@ public class CalcController : ControllerBase
                     errorMessage = $"Error: unknown operation: {request.operation}"
                 }
             );
+        }
 
         if (args == null || args.Count != expectedArgCount)
+        {
+            string errorMessage = $"Error: Not enough arguments to perform the operation {request.operation}";
+            IndependentLogger.Error($"Server encountered an error ! message: {errorMessage}");
             return Conflict
             (
                 new CalcResponse
                 {
-                    errorMessage = $"Error: Not enough arguments to perform the operation {request.operation}"
+                    errorMessage = errorMessage
                 }
             );
+        }
 
         try
         {
@@ -108,10 +116,14 @@ public class CalcController : ControllerBase
                 arguments = args,
                 result = result
             });
+            // TODO ask what name should be used for the logger (the lowercase or the original)
+            IndependentLogger.Info($"Performing operation {op}. Result is {result}");
+            IndependentLogger.Debug($"Performing operation: {op}({String.Join(",",args)}) = {result}");
             return Ok(new CalcResponse { result = result });
         }
         catch (Exception ex)
         {
+            IndependentLogger.Error($"Server encountered an error ! message: {ex.Message}");
             return Conflict
             (
                 new CalcResponse
@@ -134,11 +146,18 @@ public class CalcController : ControllerBase
     public IActionResult PushArgs([FromBody] CalcRequest request)
     {
         var args = request.arguments;
+        int argsCount = args?.Count ?? 0;
+        StackLogger.Info($"Adding total of {argsCount} argument(s) to the stack | Stack size: {CalculatorStack.Count + argsCount}");
+        StackLogger.Debug($"Adding arguments: {string.Join(",",args!)} | " +
+                          $"Stack size before {CalculatorStack.Count} | stack size after {CalculatorStack.Count + argsCount}");
+        
         if (args != null)
+        {
             foreach (var arg in args)
             {
                 CalculatorStack.Push(arg);
             }
+        }
 
         return Ok
         (
@@ -154,15 +173,23 @@ public class CalcController : ControllerBase
     {
         var op = operation.ToLower();
         if (!IsOperationValid(op, out var expectedArgCount))
+        {
+            string errorMessage = $"Error: unknown operation: {operation}";
+            StackLogger.Error($"Server encountered an error ! message: {errorMessage}");
             return Conflict
             (
                 new CalcResponse
                 {
-                    errorMessage = $"Error: unknown operation: {operation}"
+                    errorMessage = errorMessage
                 }
             );
+        }
+
         if (CalculatorStack.Count < expectedArgCount)
         {
+            string errorMessage = $"Error: cannot implement operation {op}. " +
+                                  $"It requires {expectedArgCount} arguments and the stack has only {CalculatorStack.Count} arguments";
+            StackLogger.Error($"Server encountered an error ! message: {errorMessage}");
             return Conflict
                 (
                 new CalcResponse
@@ -185,10 +212,13 @@ public class CalcController : ControllerBase
                 arguments = args,
                 result = result
             });
+            StackLogger.Info($"Performing operation {op}. Result is {result} | stack size: {CalculatorStack.Count}");
+            StackLogger.Debug($"Performing operation: {op}({String.Join(",",args)}) = {result}");
             return Ok(new CalcResponse { result = result });
         }
         catch (Exception ex)
         {
+            StackLogger.Error($"Server encountered an error ! message: {ex.Message}");
             return Conflict
                 (
                 new CalcResponse
@@ -217,6 +247,8 @@ public class CalcController : ControllerBase
             {
                 CalculatorStack.Pop();
             }
+            // TODO ask what do with in case of count not valid (either negative or too big)
+            StackLogger.Info($"Removing total {count} argument(s) from the stack | Stack size: {CalculatorStack.Count}");
         }
 
         return Ok(new CalcResponse { result = CalculatorStack.Count });
@@ -240,7 +272,8 @@ public class CalcController : ControllerBase
         {
             entries = History.FindAll(entry => entry.flavor == "INDEPENDENT");
         }
-
+        StackLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "stack")} stack actions");
+        IndependentLogger.Info($"History: So far total {entries.Count(entry => entry.flavor == "independent")} independent actions");
         return Ok(new { result = entries });
     }
 }
