@@ -19,7 +19,7 @@ public class LogsController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(loggerName) || !loggerNames.Contains(loggerName))
         {
-            return BadRequest("Logger name is invalid."); // TODO check what error code is needed here
+            return BadRequest("Logger name is invalid.");
         }
         var logger = LogManager.GetLogger(loggerName);
         var logImpl = logger.Logger as Logger;

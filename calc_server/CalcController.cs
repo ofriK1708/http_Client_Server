@@ -115,8 +115,8 @@ public class CalcController : ControllerBase
                 arguments = args,
                 result = result
             });
-            // TODO ask what name should be used for the logger (the lowercase or the original)
-            IndependentLogger.Info($"Performing operation {op}. Result is {result}");
+
+            IndependentLogger.Info($"Performing operation {request.operation}. Result is {result}");
             IndependentLogger.Debug($"Performing operation: {op}({String.Join(",",args)}) = {result}");
             return Ok(new CalcResponse { result = result });
         }
@@ -234,11 +234,13 @@ public class CalcController : ControllerBase
         {
             if (count > CalculatorStack.Count)
             {
+                string errorMessage = $"Error: cannot remove {count} from the stack. It has only {CalculatorStack.Count} arguments";
+                StackLogger.Error($"Server encountered an error ! message: {errorMessage}");
                 return Conflict
                     (
                     new CalcResponse
                         {
-                            errorMessage = $"Error: cannot remove {count} from the stack. It has only {CalculatorStack.Count} arguments"
+                            errorMessage = errorMessage
                         }
                     );
             }
@@ -246,7 +248,7 @@ public class CalcController : ControllerBase
             {
                 CalculatorStack.Pop();
             }
-            // TODO ask what do with in case of count not valid (either negative or too big)
+            
             StackLogger.Info($"Removing total {count} argument(s) from the stack | Stack size: {CalculatorStack.Count}");
         }
 
