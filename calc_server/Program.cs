@@ -3,7 +3,7 @@ using calc_server;
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(8496);
+    options.ListenAnyIP(8496);
 });
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
