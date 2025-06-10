@@ -94,8 +94,9 @@ public class CalcController : ControllerBase
 
         if (args == null || args.Count != expectedArgCount)
         {
-            string errorMessage = $"Error: Not enough arguments to perform the operation {request.operation}";
+            string errorMessage = $"Error: {(args == null || args.Count < expectedArgCount ? "Not enough" : "Too many")} arguments to perform the operation {request.operation}";
             IndependentLogger.Error($"Server encountered an error ! message: {errorMessage}");
+            
             return Conflict
             (
                 new CalcResponse
