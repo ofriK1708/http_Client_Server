@@ -3,7 +3,8 @@ using calc_server;
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(8496);
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    options.ListenAnyIP(int.Parse(port));
 });
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

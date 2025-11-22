@@ -20,6 +20,6 @@ WORKDIR /app
 COPY --from=build /app/out ./
 
 
-EXPOSE 8496
+EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "calc_server.dll"]
